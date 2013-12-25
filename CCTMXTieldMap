@@ -1,0 +1,16 @@
+    CCTMXTiledMap *map = CCTMXTiledMap::create(/*"TileMaps/iso-test-zorder.tmx"*/"TileMaps/ortho-objects.tmx");
+    map->setAnchorPoint(ccp(0.5f, 0.5f));
+    map->setPosition(ccp(winSize.width / 2.0f, winSize.height / 2.0f + 150));
+    
+    CCTMXObjectGroup *group = map->objectGroupNamed("Object Group 1"); // 文件名和你的TMX的group里面的名字保持一致
+    CCArray *arraySprite = group->getObjects();
+
+    CCObject *object = 0;
+    CCARRAY_FOREACH(arraySprite, object) {
+        CCDictionary *dict = dynamic_cast<CCDictionary *>(object);
+        CCDictElement *element = 0;
+        CCDICT_FOREACH(dict, element) {
+            CCLog("dict:key %s", element->getStrKey());  //遍历字典
+            CCLog("dict:value %f", ((CCString *)(element->getObject()))->floatValue());  
+        }
+    }
