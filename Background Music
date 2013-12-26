@@ -1,0 +1,27 @@
+#include "MyBGMusicLayer.h"
+
+#include "cocos2dExt.h"
+#include "MciPlayer.h"
+#include "SimpleAudioEngine.h"
+
+using namespace CocosDenshion;
+USING_NS_CC_EXT;
+MyBGMusicLayerTest::MyBGMusicLayerTest() {
+
+}
+
+MyBGMusicLayerTest::~MyBGMusicLayerTest() {
+
+}
+
+void MyBGMusicLayerTest::initLayer() {
+    const char *relativePath = CCFileUtils::sharedFileUtils()->fullPathFromRelativePath("Side_Event_2.wav");
+    //get the file path
+    unsigned long filesize = 0;
+    if(relativePath != 0) {
+        SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic(relativePath);
+        SimpleAudioEngine::sharedEngine()->playBackgroundMusic("Side_Event_2.wav",true);
+    } else { 
+        return ;
+    }
+}
