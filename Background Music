@@ -25,4 +25,26 @@ void MyBGMusicLayerTest::initLayer() {
     } else { 
         return ;
     }
+    
+
+    /*
+    * save the user data by the tiny database(xml)
+    */
+    CCFileUtils::sharedFileUtils()->setResourcePath("BGMusic/");
+    const char *relativePath = CCFileUtils::sharedFileUtils()->fullPathFromRelativePath("ML_G80.wav");
+    unsigned long filesize = 0;
+    if(relativePath != 0) {
+        SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic(relativePath);
+        SimpleAudioEngine::sharedEngine()->playBackgroundMusic(relativePath,true);
+    } else { 
+        return ;
+    }
+    CCUserDefault::sharedUserDefault()->setBoolForKey("bool" , true);
+    CCUserDefault::sharedUserDefault()->setDoubleForKey("double" , 45.36f);
+    CCUserDefault::sharedUserDefault()->setIntegerForKey("int", 100);
+
+    bool bool_value = CCUserDefault::sharedUserDefault()->getBoolForKey("bool");
+    double double_value = CCUserDefault::sharedUserDefault()->getDoubleForKey("double");
+    int int_value = CCUserDefault::sharedUserDefault()->getIntegerForKey("int");
+    const char *XMLFilePath = CCUserDefault::sharedUserDefault()->getXMLFilePath().c_str(); // get the xml file path 
 }
