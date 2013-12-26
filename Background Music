@@ -15,6 +15,7 @@ MyBGMusicLayerTest::~MyBGMusicLayerTest() {
 }
 
 void MyBGMusicLayerTest::initLayer() {
+    //CCFileUtils::sharedFileUtils()->setResourcePath("BGMusic/"); // add the line code , set the relative path the resource
     const char *relativePath = CCFileUtils::sharedFileUtils()->fullPathFromRelativePath("Side_Event_2.wav");
     //get the file path
     unsigned long filesize = 0;
