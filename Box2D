@@ -142,13 +142,13 @@ void MyBox2DLayer::addAnNewSprite(const CCPoint &point) {
     sprite->setPhysicsBody(body);
 }
 
-void MyBox2DLayer::update(float dt) {
+void MyBox2DLayer::update(float dt) { // update the world
     int velocityIterations = 8;
     int positionIterations = 1;
 
     world->Step(dt, velocityIterations, positionIterations);
 }
-
+ 
 void MyBox2DLayer::ccTouchesEnded(CCSet* touches, CCEvent* event) {
     CCTouch *touch = (dynamic_cast<CCTouch *>(touches->anyObject()));
     CCPoint setPoint = touch->locationInView();
