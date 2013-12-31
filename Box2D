@@ -80,7 +80,7 @@ void MyBox2DLayer::initLayer() {
 void MyBox2DLayer::initPhysics() {
     CCSize size = CCDirector::sharedDirector()->getWinSize();
     b2Vec2 gravity;// step: 1
-    gravity.Set(0.0f, -10.0f);
+    gravity.Set(0.0f, -10.0f);// set the gravity direction(x, y) is in GL
     world = new b2World(gravity);
 
     //step: 2
