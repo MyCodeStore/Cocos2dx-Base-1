@@ -1,0 +1,157 @@
+#include "MyBox2DLayer.h"
+#include "Box2D/Box2D.h"
+
+#define PTM_RATIO 32
+typedef enum {
+    KSPRITE_BATCH = 0,
+} KSpriteTag;
+
+MyBox2DSprite::MyBox2DSprite() { 
+
+}
+
+void MyBox2DSprite::setPhysicsBody(b2Body * body) {
+    m_pBody = body;
+}
+
+bool MyBox2DSprite::isDirty(void) {
+    return true;
+}
+
+CCAffineTransform MyBox2DSprite::nodeToParentTransform(void) {
+    b2Vec2 pos  = m_pBody->GetPosition();
+
+    float x = pos.x * PTM_RATIO;
+    float y = pos.y * PTM_RATIO;
+
+    if ( isIgnoreAnchorPointForPosition() ) {
+        x += m_tAnchorPointInPoints.x;
+        y += m_tAnchorPointInPoints.y;
+    }
+
+    // Make matrix
+    float radians = m_pBody->GetAngle();
+    float c = cosf(radians);
+    float s = sinf(radians);
+
+    if( ! CCPoint::CCPointEqualToPoint(m_tAnchorPointInPoints, CCPointZero) ){
+        x += c*-m_tAnchorPointInPoints.x + -s*-m_tAnchorPointInPoints.y;
+        y += s*-m_tAnchorPointInPoints.x + c*-m_tAnchorPointInPoints.y;
+    }
+
+    // Rot, Translate Matrix
+    m_tTransform = CCAffineTransformMake( c,  s,
+        -s,    c,
+        x,    y );
+
+    return m_tTransform;
+}
+
+MyBox2DLayer::MyBox2DLayer() {
+    m_SpriteNode = 0;
+    world = 0; // the box2d world
+}
+
+MyBox2DLayer::~MyBox2DLayer() {
+    if(world != 0) {
+        delete world;
+        world = 0;
+    }
+}
+
+void MyBox2DLayer::initLayer() {
+    CCSize size = CCDirector::sharedDirector()->getWinSize();
+    this->setTouchEnabled(true);
+    this->setAccelerometerEnabled(true);
+    /*
+    *Init the box2d physics
+    */
+    initPhysics();
+    //
+    CCSpriteBatchNode *batch = CCSpriteBatchNode::create("Images/ball-hd.png", 100);
+    m_SpriteNode = batch->getTexture();
+
+    this->addChild(batch, 0, KSPRITE_BATCH);
+    addAnNewSprite(ccp(size.width / 2.0f, size.height / 2.0f));
+
+    scheduleUpdate();// update the time
+}
+
+void MyBox2DLayer::initPhysics() {
+    CCSize size = CCDirector::sharedDirector()->getWinSize();
+    b2Vec2 gravity;// step: 1
+    gravity.Set(0.0f, -10.0f);
+    world = new b2World(gravity);
+
+    //step: 2
+    world->SetAllowSleeping(true); // pause all ,init the box2d world
+    world->SetContinuousPhysics(true); // resume the box2d
+
+    //step: 3, defint the body
+    b2BodyDef groundbody;
+    groundbody.position.Set(0, 0);
+    b2Body *body = world->CreateBody(&groundbody);
+
+    //step: 3, define the edge
+    // define the 4 edges
+    b2EdgeShape edgeBox;
+    edgeBox.Set(b2Vec2(0, size.height), b2Vec2(0, 0));
+    body->CreateFixture(&edgeBox, 0);
+
+    edgeBox.Set(b2Vec2(0, 0), b2Vec2(size.width, 0));
+    body->CreateFixture(&edgeBox, 0);
+ 
+    edgeBox.Set(b2Vec2(0, size.height), b2Vec2(size.width, size.height));
+    body->CreateFixture(&edgeBox, 0);
+
+    edgeBox.Set(b2Vec2(size.width, size.height), b2Vec2(size.width, 0));
+    body->CreateFixture(&edgeBox, 0);
+    
+}
+
+void MyBox2DLayer::addAnNewSprite(const CCPoint &point) {
+    CCSize size = CCDirector::sharedDirector()->getWinSize();
+    CCNode* parent = getChildByTag(KSPRITE_BATCH);
+    MyBox2DSprite *sprite = new MyBox2DSprite;
+    sprite->initWithTexture(m_SpriteNode);
+    sprite->setAnchorPoint(ccp(0.5f, 0.5f));
+    sprite->setPosition(point);
+    parent->addChild(sprite, 1);
+    sprite->autorelease();    
+
+    //
+    b2BodyDef bodydef;
+    bodydef.type = b2_dynamicBody; // set the kind of the sprite
+    bodydef.position.Set(point.x / PTM_RATIO, point.y / PTM_RATIO);
+
+    //body
+    b2Body *body = world->CreateBody(&bodydef);
+    
+    //shape
+    b2PolygonShape dynamicShape;
+    dynamicShape.SetAsBox(.5f, .5f);
+    
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicShape;    
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.3f;
+    
+    //set bodydef values;
+    body->CreateFixture(&fixtureDef);
+
+    sprite->setPhysicsBody(body);
+}
+
+void MyBox2DLayer::update(float dt) {
+    int velocityIterations = 8;
+    int positionIterations = 1;
+
+    world->Step(dt, velocityIterations, positionIterations);
+}
+
+void MyBox2DLayer::ccTouchesEnded(CCSet* touches, CCEvent* event) {
+    CCTouch *touch = (dynamic_cast<CCTouch *>(touches->anyObject()));
+    CCPoint setPoint = touch->locationInView();
+    CCPoint touchPoint = CCDirector::sharedDirector()->convertToGL(setPoint);
+    addAnNewSprite(touchPoint);
+}
