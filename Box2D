@@ -135,6 +135,7 @@ void MyBox2DLayer::addAnNewSprite(const CCPoint &point) {
     fixtureDef.shape = &dynamicShape;    
     fixtureDef.density = 1.0f;
     fixtureDef.friction = 0.3f;
+    fixtureDef.restitution = 0.8f; // set the restitution speed of the sprite
     
     //set bodydef values;
     body->CreateFixture(&fixtureDef);
